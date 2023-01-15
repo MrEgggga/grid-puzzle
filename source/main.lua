@@ -1,7 +1,10 @@
 import "CoreLibs/math"
+import "CoreLibs/graphics"
 
 local gfx = playdate.graphics
 local mat = playdate.math
+
+local displayTitle = false
 
 local arrows = {
   gfx.image.new('images/up.png'),
@@ -22,7 +25,8 @@ local score = 0
 
 playdate.display.setRefreshRate(50)
 
-local font = gfx.font.new('fonts/mont3.pft')
+local fntScore = gfx.font.new('fonts/mont-bold.pft')
+local fntText = gfx.font.new('fonts/mont-thin.pft')
 
 local function init()
   for i = 1,10 do
@@ -36,13 +40,29 @@ local function init()
   last = {x=pos.x,y=pos.y}
   l = 0
   score = 0
+
+  gfx.clear()
+  for i = 1,10 do
+    for j = 1,20 do
+      print(i,j)
+      arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
+    end
+  end
+  fntScore:drawText(score, 0, 200)
 end
 
 init()
 
 function playdate.update()
+  if displayTitle then
+    gfx.clear(gfx.kColorBlack)
+    gfx.setImageDrawMode(gfx.kDrawModeNXOR)
+    fntText:drawTextAligned("grid puzzle", 200, 105, kTextAlignment.center)
+    return
+  end
+
   local current, pressed, released = playdate.getButtonState()
-  if l >= 1 and pressed > 0 then
+  if l >= 1 and (pressed & (playdate.kButtonA | playdate.kButtonUp | playdate.kButtonDown | playdate.kButtonLeft | playdate.kButtonRight)) > 0 then
     last = {x=pos.x, y=pos.y}
     local dir = grid[pos.y][pos.x]
     if dir == 1 then
@@ -86,9 +106,17 @@ function playdate.update()
   end
 
   -- draw state
-  gfx.clear(gfx.kColorWhite)
-  for i = 1,10 do
-    for j = 1,20 do
+  gfx.setColor(gfx.kColorWhite)
+  gfx.fillRect(pos.x * 20 - 40, pos.y * 20 - 40, 60, 60)
+  gfx.fillRect(0, 200, 100, 40)
+  local px1, px2, py1, py2 =
+    math.max(pos.x - 1, 1),
+    math.min(pos.x + 1, 20),
+    math.max(pos.y - 1, 1),
+    math.min(pos.y + 1, 10)
+  for i = py1,py2 do
+    for j = px1,px2 do
+      print(i,j)
       arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
     end
   end
@@ -98,5 +126,5 @@ function playdate.update()
   gfx.setColor(gfx.kColorXOR)
   gfx.fillRect(posX * 20 - 20, posY * 20 - 20, 20, 20)
 
-  font:drawText(score, 0, 200)
+  fntScore:drawText(score, 0, 200)
 end
