@@ -38,7 +38,7 @@ local function init()
   end
   pos = {x=10,y=6}
   last = {x=pos.x,y=pos.y}
-  l = 0
+  l = 0.9
   score = 0
 
   gfx.clear()
@@ -61,8 +61,14 @@ function playdate.update()
     return
   end
 
+  local updateFrame = false
   local current, pressed, released = playdate.getButtonState()
-  if l >= 1 and (pressed & (playdate.kButtonA | playdate.kButtonUp | playdate.kButtonDown | playdate.kButtonLeft | playdate.kButtonRight)) > 0 then
+  if l >= 1 and (pressed & (
+      playdate.kButtonA |
+      playdate.kButtonUp |
+      playdate.kButtonDown |
+      playdate.kButtonLeft |
+      playdate.kButtonRight)) > 0 then
     last = {x=pos.x, y=pos.y}
     local dir = grid[pos.y][pos.x]
     if dir == 1 then
@@ -101,30 +107,33 @@ function playdate.update()
       if new == 5 then score += 1 end
     end
   elseif l < 1 then
+    updateFrame = true
     l += 0.1
     if l > 1 then l = 1 end
   end
 
   -- draw state
-  gfx.setColor(gfx.kColorWhite)
-  gfx.fillRect(pos.x * 20 - 40, pos.y * 20 - 40, 60, 60)
-  gfx.fillRect(0, 200, 100, 40)
-  local px1, px2, py1, py2 =
-    math.max(pos.x - 1, 1),
-    math.min(pos.x + 1, 20),
-    math.max(pos.y - 1, 1),
-    math.min(pos.y + 1, 10)
-  for i = py1,py2 do
-    for j = px1,px2 do
-      print(i,j)
-      arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
+  if updateFrame then
+    gfx.setColor(gfx.kColorWhite)
+    gfx.fillRect(pos.x * 20 - 40, pos.y * 20 - 40, 60, 60)
+    gfx.fillRect(0, 200, 100, 40)
+    local px1, px2, py1, py2 =
+      math.max(pos.x - 1, 1),
+      math.min(pos.x + 1, 20),
+      math.max(pos.y - 1, 1),
+      math.min(pos.y + 1, 10)
+    for i = py1,py2 do
+      for j = px1,px2 do
+        print(i,j)
+        arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
+      end
     end
-  end
-  
-  local posX = mat.lerp(last.x, pos.x, l)
-  local posY = mat.lerp(last.y, pos.y, l)
-  gfx.setColor(gfx.kColorXOR)
-  gfx.fillRect(posX * 20 - 20, posY * 20 - 20, 20, 20)
 
-  fntScore:drawText(score, 0, 200)
+    local posX = mat.lerp(last.x, pos.x, l)
+    local posY = mat.lerp(last.y, pos.y, l)
+    gfx.setColor(gfx.kColorXOR)
+    gfx.fillRect(posX * 20 - 20, posY * 20 - 20, 20, 20)
+
+    fntScore:drawText(score, 0, 200)
+  end
 end
