@@ -81,7 +81,7 @@ function playdate.update()
       if new == 5 then score += 1 end
     end
   elseif l < 1 then
-    l += 0.04
+    l += 0.1
     if l > 1 then l = 1 end
   end
 
