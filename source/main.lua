@@ -46,11 +46,13 @@ local pages = {
 
 local manItem, error = menu:addMenuItem("game manual", function ()
   textPage = true
+  justTextPage = false
   whichPage = 1
 end)
 
 local credItem, error = menu:addMenuItem("credits", function ()
   textPage = true
+  justTextPage = false
   whichPage = 2
 end)
 

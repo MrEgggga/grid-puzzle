@@ -2,5 +2,5 @@ name=grid puzzle
 author=jmibo
 description=bad puzzle game
 bundleID=io.itch.fried-stew.grid-puzzle
-version=1.04
+version=1.10
 imagePath=images/launcher
