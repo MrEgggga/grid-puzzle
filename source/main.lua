@@ -6,6 +6,8 @@ local mat = playdate.math
 
 local displayTitle = false
 
+local menu = playdate.getSystemMenu()
+
 local arrows = {
   gfx.image.new('images/up.png'),
   gfx.image.new('images/down.png'),
@@ -23,10 +25,32 @@ local last = {x=pos.x,y=pos.y}
 local l = 1
 local score = 0
 
+local manual = false
+local justManual = false
+
+local menuItem, error = menu:addMenuItem("game manual", function ()
+  manual = true
+end)
+
 playdate.display.setRefreshRate(50)
 
 local fntScore = gfx.font.new('fonts/mont-bold.pft')
 local fntText = gfx.font.new('fonts/mont-thin.pft')
+
+local function fullRedraw()
+  gfx.clear()
+  for i = 1,10 do
+    for j = 1,20 do
+      arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
+    end
+  end
+  fntScore:drawText(score, 0, 200)
+
+  local posX = mat.lerp(last.x, pos.x, l)
+  local posY = mat.lerp(last.y, pos.y, l)
+  gfx.setColor(gfx.kColorXOR)
+  gfx.fillRect(posX * 20 - 20, posY * 20 - 20, 20, 20)
+end
 
 local function init()
   for i = 1,10 do
@@ -40,15 +64,7 @@ local function init()
   last = {x=pos.x,y=pos.y}
   l = 0.9
   score = 0
-
-  gfx.clear()
-  for i = 1,10 do
-    for j = 1,20 do
-      print(i,j)
-      arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
-    end
-  end
-  fntScore:drawText(score, 0, 200)
+  fullRedraw()
 end
 
 init()
@@ -62,6 +78,34 @@ function playdate.update()
   end
 
   local updateFrame = false
+
+  if manual then
+    if not justManual then
+      gfx.clear(gfx.kColorBlack)
+      gfx.setImageDrawMode(gfx.kDrawModeNXOR)
+      fntText:drawText("grid puzzle", 0, 0)
+      gfx.drawText(
+        "controls: d-pad. pressing any direction on the d-pad\n" ..
+        "will send you one step in the current direction of the\n" ..
+        "arrow you're standing on and change that arrow to\n" ..
+        "whichever direction you pressed. pressing in the\n" ..
+        "same direction as the current arrow will change the\n" ..
+        "current arrow to an X instead, granting you one\n" ..
+        "point but preventing you from landing on that square\n" ..
+        "again. landing on an X or going off the edge of the\n" ..
+        "screen results in a game over.", 0, 40)
+      gfx.drawTextAligned("(press B)", 400, 220, kTextAlignment.right)
+    end
+    justManual = true
+    if playdate.buttonJustPressed(playdate.kButtonB) then
+      manual = false
+    end
+    return
+  elseif justManual then
+    justManual = false
+    fullRedraw()
+  end
+
   local current, pressed, released = playdate.getButtonState()
   if l >= 1 and (pressed & (
       playdate.kButtonA |
@@ -124,7 +168,6 @@ function playdate.update()
       math.min(pos.y + 1, 10)
     for i = py1,py2 do
       for j = px1,px2 do
-        print(i,j)
         arrows[grid[i][j]]:draw(j * 20 - 20, i * 20 - 20)
       end
     end
