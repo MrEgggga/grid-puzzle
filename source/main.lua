@@ -39,7 +39,8 @@ local pages = {
   "again. landing on an X or going off the edge of the\n" ..
   "screen results in a game over.",
 
-  "game by jmibo\n\n" ..
+  "game by jmibo\n" ..
+  "https://github.com/MrEgggga/grid-puzzle/\n" ..
   "more games at https://jmibo.neocities.org/"
 }
 
