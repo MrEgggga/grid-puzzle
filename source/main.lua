@@ -25,11 +25,32 @@ local last = {x=pos.x,y=pos.y}
 local l = 1
 local score = 0
 
-local manual = false
-local justManual = false
+local textPage = false
+local whichPage = 0
+local justTextPage = false
+local pages = {
+  "controls: d-pad. pressing any direction on the d-pad\n" ..
+  "will send you one step in the current direction of the\n" ..
+  "arrow you're standing on and change that arrow to\n" ..
+  "whichever direction you pressed. pressing in the\n" ..
+  "same direction as the current arrow will change the\n" ..
+  "current arrow to an X instead, granting you one\n" ..
+  "point but preventing you from landing on that square\n" ..
+  "again. landing on an X or going off the edge of the\n" ..
+  "screen results in a game over.",
 
-local menuItem, error = menu:addMenuItem("game manual", function ()
-  manual = true
+  "game by jmibo\n\n" ..
+  "more games at https://jmibo.neocities.org/"
+}
+
+local manItem, error = menu:addMenuItem("game manual", function ()
+  textPage = true
+  whichPage = 1
+end)
+
+local credItem, error = menu:addMenuItem("credits", function ()
+  textPage = true
+  whichPage = 2
 end)
 
 playdate.display.setRefreshRate(50)
@@ -79,30 +100,21 @@ function playdate.update()
 
   local updateFrame = false
 
-  if manual then
-    if not justManual then
+  if textPage then
+    if not justTextPage then
       gfx.clear(gfx.kColorBlack)
       gfx.setImageDrawMode(gfx.kDrawModeNXOR)
       fntText:drawText("grid puzzle", 0, 0)
-      gfx.drawText(
-        "controls: d-pad. pressing any direction on the d-pad\n" ..
-        "will send you one step in the current direction of the\n" ..
-        "arrow you're standing on and change that arrow to\n" ..
-        "whichever direction you pressed. pressing in the\n" ..
-        "same direction as the current arrow will change the\n" ..
-        "current arrow to an X instead, granting you one\n" ..
-        "point but preventing you from landing on that square\n" ..
-        "again. landing on an X or going off the edge of the\n" ..
-        "screen results in a game over.", 0, 40)
+      gfx.drawText(pages[whichPage], 0, 40)
       gfx.drawTextAligned("(press B)", 400, 220, kTextAlignment.right)
     end
-    justManual = true
+    justTextPage = true
     if playdate.buttonJustPressed(playdate.kButtonB) then
-      manual = false
+      textPage = false
     end
     return
-  elseif justManual then
-    justManual = false
+  elseif justTextPage then
+    justTextPage = false
     fullRedraw()
   end
 
